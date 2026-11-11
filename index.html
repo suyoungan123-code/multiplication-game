@@ -3,20 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>신나는 구구단 연습 게임 🎮</title>
+  <title>✨ 신나는 구구단 챌린지 10! ✨</title>
+  <!-- 구글 웹폰트: 주아체, 고운돋움 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Round&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
+  <!-- 폭죽 효과 라이브러리 -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
+    :root {
+      --primary-yellow: #FFF9C4;
+      --card-bg: #FFFFFF;
+      --accent-coral: #FF6B8B;
+      --accent-sky: #4ECDC4;
+      --accent-yellow: #FFD166;
+      --accent-purple: #A06CD5;
+      --text-main: #2D3142;
+      --text-sub: #4F5D75;
+      --green-correct: #2EC4B6;
+      --red-wrong: #FF5964;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Jua', 'Nanum Round', sans-serif;
+      font-family: 'Jua', 'Gowun Dodum', cursive, sans-serif;
+      user-select: none;
     }
 
     body {
-      background: linear-gradient(135deg, #FFF9E6 0%, #E8F5E9 100%);
+      background: linear-gradient(135deg, #FFE6FA 0%, #E8F0FE 50%, #E2F9E8 100%);
       min-height: 100vh;
       display: flex;
       justify-content: center;
@@ -24,105 +41,150 @@
       padding: 20px;
     }
 
-    .game-card {
-      background: #FFFFFF;
-      width: 100%;
-      max-width: 480px;
-      border-radius: 36px;
-      padding: 36px 28px;
-      box-shadow: 0 16px 32px rgba(99, 133, 102, 0.18);
-      text-align: center;
-      border: 4px solid #FFD54F;
-      position: relative;
-      overflow: hidden;
+    /* 통통 튀는 애니메이션 효과 */
+    @keyframes bounceIn {
+      0% { transform: scale(0.85); opacity: 0; }
+      60% { transform: scale(1.05); }
+      100% { transform: scale(1); opacity: 1; }
     }
 
-    .badge-deco {
-      position: absolute;
-      top: -12px;
-      right: 24px;
-      background: #FF6F61;
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-3deg); }
+      75% { transform: rotate(3deg); }
+    }
+
+    @keyframes popCorrect {
+      0% { transform: scale(0.8); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes shakeWrong {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-10px); }
+      40%, 80% { transform: translateX(10px); }
+    }
+
+    .game-card {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 480px;
+      border-radius: 40px;
+      padding: 32px 24px;
+      box-shadow: 0 20px 40px rgba(160, 108, 213, 0.18), 0 6px 0 #EAD7FF;
+      border: 5px solid #FFDE59;
+      text-align: center;
+      position: relative;
+      animation: bounceIn 0.5s ease-out;
+    }
+
+    /* 상단 배지 */
+    .top-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(45deg, #FF6B8B, #FFA07A);
       color: white;
-      font-size: 15px;
-      padding: 8px 16px;
-      border-radius: 20px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-      transform: rotate(4deg);
+      font-size: 16px;
+      padding: 8px 18px;
+      border-radius: 30px;
+      box-shadow: 0 4px 10px rgba(255, 107, 139, 0.3);
+      margin-bottom: 12px;
+      animation: wiggle 3s infinite ease-in-out;
     }
 
     h1 {
       font-size: 32px;
-      color: #388E3C;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    p.subtitle {
-      font-size: 18px;
-      color: #795548;
-      margin-bottom: 24px;
-    }
-
-    /* 점수판 */
-    .score-board {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin-bottom: 24px;
-      background: #FFFDE7;
-      padding: 12px 20px;
-      border-radius: 20px;
-      border: 2px dashed #FFD54F;
-    }
-
-    .score-item {
-      font-size: 18px;
-      color: #555;
-    }
-
-    .score-item span {
-      font-size: 22px;
       color: #FF5722;
-      font-weight: bold;
+      text-shadow: 2px 2px 0px #FFE082;
+      margin-bottom: 6px;
     }
 
-    /* 문제 영역 */
+    .sub-title {
+      font-size: 17px;
+      color: #6C757D;
+      margin-bottom: 18px;
+    }
+
+    /* 진행도 표시 바 (10단계) */
+    .progress-container {
+      margin-bottom: 20px;
+      background: #F3F4F6;
+      border-radius: 20px;
+      padding: 6px;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.06);
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 10px 4px;
+      font-size: 15px;
+      color: #6A1B9A;
+    }
+
+    .progress-bar-bg {
+      background: #E0E0E0;
+      height: 14px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 10%;
+      background: linear-gradient(90deg, #FF9A8B 0%, #FF6A88 55%, #FF99AC 100%);
+      border-radius: 10px;
+      transition: width 0.4s ease-in-out;
+    }
+
+    /* 문제 상자 */
     .question-box {
-      background: #F1F8E9;
-      border: 3px solid #81C784;
-      border-radius: 28px;
-      padding: 28px 16px;
-      margin-bottom: 28px;
-      box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);
+      background: linear-gradient(135deg, #FFFDE7 0%, #FFF9C4 100%);
+      border: 4px dashed #FFCA28;
+      border-radius: 30px;
+      padding: 24px 12px;
+      margin-bottom: 22px;
+      position: relative;
+    }
+
+    .question-tag {
+      position: absolute;
+      top: -12px;
+      left: 20px;
+      background: #7E57C2;
+      color: white;
+      font-size: 14px;
+      padding: 3px 12px;
+      border-radius: 12px;
     }
 
     .question-text {
-      font-size: 52px;
-      letter-spacing: 4px;
-      color: #2E7D32;
+      font-size: 56px;
+      letter-spacing: 5px;
+      color: #D84315;
+      text-shadow: 1px 2px 0 #FFF;
     }
 
-    /* 입력 영역 */
-    .input-wrapper {
+    /* 정답 입력 폼 */
+    .input-row {
       display: flex;
       justify-content: center;
       gap: 12px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     input[type="number"] {
       width: 140px;
       height: 64px;
-      border: 3px solid #FFB300;
-      border-radius: 20px;
+      border: 4px solid #4DD0E1;
+      border-radius: 24px;
       font-size: 38px;
       text-align: center;
-      color: #333;
+      color: #00838F;
       outline: none;
-      background: #FFFDE7;
+      background: #E0F7FA;
       transition: all 0.2s ease;
       -moz-appearance: textfield;
     }
@@ -134,70 +196,65 @@
     }
 
     input[type="number"]:focus {
-      border-color: #FF8F00;
       background: #FFF;
-      box-shadow: 0 0 12px rgba(255, 179, 0, 0.4);
-      transform: scale(1.05);
+      border-color: #00ACC1;
+      box-shadow: 0 0 16px rgba(0, 188, 212, 0.4);
+      transform: scale(1.04);
     }
 
-    .btn-check {
+    .btn-confirm {
       height: 64px;
       padding: 0 28px;
       font-size: 24px;
       color: white;
-      background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);
+      background: linear-gradient(180deg, #26C6DA 0%, #0097A7 100%);
       border: none;
-      border-radius: 20px;
+      border-radius: 24px;
       cursor: pointer;
-      box-shadow: 0 6px 0 #2E7D32, 0 10px 15px rgba(0,0,0,0.1);
+      box-shadow: 0 6px 0 #006064, 0 8px 16px rgba(0,0,0,0.12);
       transition: all 0.1s ease;
     }
 
-    .btn-check:hover {
-      background: linear-gradient(180deg, #66BB6A 0%, #43A047 100%);
-    }
-
-    .btn-check:active {
+    .btn-confirm:active {
       transform: translateY(4px);
-      box-shadow: 0 2px 0 #2E7D32;
+      box-shadow: 0 2px 0 #006064;
     }
 
-    /* 피드백 및 결과 영역 */
+    /* 피드백 알림 박스 */
     .feedback-box {
-      min-height: 85px;
+      min-height: 80px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      margin-bottom: 20px;
-      border-radius: 20px;
-      padding: 10px 16px;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      margin-bottom: 16px;
+      border-radius: 22px;
+      padding: 10px 14px;
+      transition: all 0.3s ease;
     }
 
     .feedback-box.correct {
-      background-color: #E8F5E9;
-      animation: pop 0.4s ease forwards;
+      background-color: #E8F8F5;
+      border: 2px solid #A3E4D7;
+      animation: popCorrect 0.4s ease forwards;
     }
 
     .feedback-box.wrong {
       background-color: #FFEBEE;
-      animation: shake 0.4s ease forwards;
+      border: 2px solid #FFCDD2;
+      animation: shakeWrong 0.4s ease forwards;
     }
 
-    .feedback-big {
-      font-size: 42px;
+    .feedback-correct-text {
+      font-size: 44px;
+      color: #16A085;
       font-weight: bold;
-      line-height: 1.2;
     }
 
-    .feedback-big.correct-text {
-      color: #2E7D32;
-    }
-
-    .feedback-big.wrong-text {
-      font-size: 24px;
-      color: #D32F2F;
+    .feedback-wrong-text {
+      font-size: 23px;
+      color: #E53935;
+      line-height: 1.4;
     }
 
     .btn-next {
@@ -206,82 +263,185 @@
       height: 60px;
       font-size: 24px;
       color: white;
-      background: linear-gradient(180deg, #FF9800 0%, #F57C00 100%);
+      background: linear-gradient(180deg, #FFB300 0%, #FB8C00 100%);
       border: none;
-      border-radius: 20px;
+      border-radius: 24px;
       cursor: pointer;
-      box-shadow: 0 6px 0 #E65100, 0 10px 15px rgba(0,0,0,0.1);
+      box-shadow: 0 6px 0 #EF6C00, 0 8px 16px rgba(0,0,0,0.15);
       transition: all 0.1s ease;
     }
 
     .btn-next:active {
       transform: translateY(4px);
-      box-shadow: 0 2px 0 #E65100;
+      box-shadow: 0 2px 0 #EF6C00;
     }
 
-    @keyframes pop {
-      0% { transform: scale(0.85); opacity: 0; }
-      70% { transform: scale(1.08); opacity: 1; }
-      100% { transform: scale(1); }
+    /* 최종 결과 카드 (10문제 완료 시) */
+    .result-container {
+      display: none;
+      animation: bounceIn 0.6s ease-out;
     }
 
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      20%, 60% { transform: translateX(-8px); }
-      40%, 80% { transform: translateX(8px); }
+    .result-score-tag {
+      font-size: 24px;
+      color: #5E35B1;
+      margin-bottom: 8px;
+    }
+
+    .result-main-score {
+      font-size: 38px;
+      color: #E91E63;
+      margin-bottom: 16px;
+      background: #FFF0F5;
+      padding: 16px;
+      border-radius: 28px;
+      border: 3px dashed #F48FB1;
+    }
+
+    .result-character {
+      font-size: 72px;
+      margin-bottom: 10px;
+      animation: wiggle 2s infinite ease-in-out;
+    }
+
+    .result-praise {
+      font-size: 34px;
+      font-weight: bold;
+      color: #2E7D32;
+      margin-bottom: 12px;
+    }
+
+    .result-desc {
+      font-size: 18px;
+      color: #555;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .btn-restart {
+      width: 100%;
+      height: 64px;
+      font-size: 25px;
+      color: white;
+      background: linear-gradient(180deg, #AB47BC 0%, #8E24AA 100%);
+      border: none;
+      border-radius: 24px;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #6A1B9A, 0 10px 18px rgba(0,0,0,0.15);
+      transition: all 0.1s ease;
+    }
+
+    .btn-restart:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #6A1B9A;
     }
   </style>
 </head>
 <body>
 
   <div class="game-card">
-    <div class="badge-deco">초등 2학년</div>
-    <h1>🌟 구구단 놀이터 🌟</h1>
-    <p class="subtitle">문제를 보고 정답을 맞춰보세요!</p>
+    
+    <!-- 1. 게임 진행 뷰 -->
+    <div id="game-view">
+      <div class="top-badge">⭐ 2학년 구구단 마스터 ⭐</div>
+      <h1>🌈 10문제 구구단 챌린지!</h1>
+      <p class="sub-title">10문제를 연속으로 풀고 실력을 뽐내봐요!</p>
 
-    <div class="score-board">
-      <div class="score-item">맞힌 개수: <span id="correct-count">0</span>개</div>
-      <div class="score-item">도전 횟수: <span id="total-count">0</span>회</div>
+      <!-- 10문제 진행도 게이지 -->
+      <div class="progress-container">
+        <div class="progress-info">
+          <span>문제 진행도</span>
+          <span id="progress-text">1 / 10</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+      </div>
+
+      <!-- 문제 영역 -->
+      <div class="question-box">
+        <div class="question-tag" id="question-index-tag">1번 문제</div>
+        <div class="question-text" id="question">2 × 3 = ?</div>
+      </div>
+
+      <!-- 답안 입력 영역 -->
+      <div class="input-row">
+        <input type="number" id="user-answer" placeholder="?" autocomplete="off" />
+        <button class="btn-confirm" id="btn-submit">확인</button>
+      </div>
+
+      <!-- 정답 / 오답 알림 -->
+      <div class="feedback-box" id="feedback"></div>
+
+      <!-- 다음 문제로 이동 버튼 -->
+      <button class="btn-next" id="btn-next">다음 문제로 Go! ➡️</button>
     </div>
 
-    <!-- 문제 표시 -->
-    <div class="question-box">
-      <div class="question-text" id="question">2 × 3 = ?</div>
+    <!-- 2. 결과 뷰 (10문제 완료 시 노출) -->
+    <div class="result-container" id="result-view">
+      <div class="result-score-tag">🎉 챌린지 완료! 🎉</div>
+      <div class="result-character" id="result-emoji">👑</div>
+      <div class="result-main-score" id="result-summary">
+        10개 중 <span id="final-correct-count" style="color: #FF1744; font-size: 48px;">10</span>개 정답!
+      </div>
+      <div class="result-praise" id="result-praise-text">완벽해요!</div>
+      <div class="result-desc" id="result-praise-sub">구구단 천재인가요? 최고예요! 👏</div>
+      
+      <button class="btn-restart" id="btn-restart">🔄 다시 도전하기</button>
     </div>
 
-    <!-- 답안 입력 -->
-    <div class="input-wrapper" id="input-container">
-      <input type="number" id="user-answer" placeholder="?" autocomplete="off" />
-      <button class="btn-check" id="btn-submit">확인</button>
-    </div>
-
-    <!-- 결과 안내 문구 -->
-    <div class="feedback-box" id="feedback"></div>
-
-    <!-- 다음 문제 버튼 -->
-    <button class="btn-next" id="btn-next">다음 문제 풀기 ➡️</button>
   </div>
 
   <script>
+    const TOTAL_QUESTIONS = 10;
+    let currentQuestionIndex = 0; // 0 ~ 9
+    let correctCount = 0;
     let num1 = 2;
     let num2 = 1;
-    let correctCount = 0;
-    let totalCount = 0;
 
+    // 요소 선택
+    const gameView = document.getElementById('game-view');
+    const resultView = document.getElementById('result-view');
     const questionEl = document.getElementById('question');
+    const questionIndexTag = document.getElementById('question-index-tag');
     const answerInput = document.getElementById('user-answer');
     const submitBtn = document.getElementById('btn-submit');
     const feedbackBox = document.getElementById('feedback');
     const nextBtn = document.getElementById('btn-next');
-    const correctCountEl = document.getElementById('correct-count');
-    const totalCountEl = document.getElementById('total-count');
+    const progressText = document.getElementById('progress-text');
+    const progressFill = document.getElementById('progress-fill');
 
-    // 새 문제 생성 함수 (2단 ~ 9단, 곱하는 수도 1 ~ 9)
-    function generateQuestion() {
-      num1 = Math.floor(Math.random() * 8) + 2; // 2 ~ 9
-      num2 = Math.floor(Math.random() * 9) + 1; // 1 ~ 9
+    // 결과 뷰 요소
+    const finalCorrectCount = document.getElementById('final-correct-count');
+    const resultPraiseText = document.getElementById('result-praise-text');
+    const resultPraiseSub = document.getElementById('result-praise-sub');
+    const resultEmoji = document.getElementById('result-emoji');
+    const restartBtn = document.getElementById('btn-restart');
 
+    // 게임 시작 및 리셋
+    function startGame() {
+      currentQuestionIndex = 0;
+      correctCount = 0;
+      gameView.style.display = 'block';
+      resultView.style.display = 'none';
+      generateNextQuestion();
+    }
+
+    // 새 문제 출제
+    function generateNextQuestion() {
+      currentQuestionIndex++;
+
+      // 2~9단, 1~9 사이
+      num1 = Math.floor(Math.random() * 8) + 2; 
+      num2 = Math.floor(Math.random() * 9) + 1;
+
+      // 화면 업데이트
+      questionIndexTag.textContent = `${currentQuestionIndex}번 문제`;
       questionEl.textContent = `${num1} × ${num2} = ?`;
+      progressText.textContent = `${currentQuestionIndex} / ${TOTAL_QUESTIONS}`;
+      progressFill.style.width = `${(currentQuestionIndex / TOTAL_QUESTIONS) * 100}%`;
+
+      // 인풋 및 피드백 초기화
       answerInput.value = '';
       answerInput.disabled = false;
       submitBtn.disabled = false;
@@ -291,7 +451,7 @@
       answerInput.focus();
     }
 
-    // 정답 체크 함수
+    // 정답 체크
     function checkAnswer() {
       const userVal = answerInput.value.trim();
 
@@ -303,7 +463,6 @@
 
       const userAnswer = parseInt(userVal, 10);
       const correctAnswer = num1 * num2;
-      totalCount++;
 
       answerInput.disabled = true;
       submitBtn.disabled = true;
@@ -311,20 +470,104 @@
       if (userAnswer === correctAnswer) {
         correctCount++;
         feedbackBox.className = 'feedback-box correct';
-        feedbackBox.innerHTML = `<span class="feedback-big correct-text">🎉 정답! 🎉</span>`;
+        feedbackBox.innerHTML = `<span class="feedback-correct-text">🎉 정답! 🎉</span>`;
+        // 정답일 때 미니 폭죽 효과
+        if (typeof confetti === 'function') {
+          confetti({
+            particleCount: 35,
+            spread: 60,
+            origin: { y: 0.7 }
+          });
+        }
       } else {
         feedbackBox.className = 'feedback-box wrong';
-        feedbackBox.innerHTML = `<span class="feedback-big wrong-text">😢 아쉬워요! 정답은 <strong>${correctAnswer}</strong>이에요.</span>`;
+        feedbackBox.innerHTML = `<span class="feedback-wrong-text">😢 아쉬워요! 정답은 <strong>${correctAnswer}</strong>이에요.</span>`;
       }
 
-      correctCountEl.textContent = correctCount;
-      totalCountEl.textContent = totalCount;
+      // 10번째 문제라면 버튼 텍스트를 '결과 확인하기'로 변경
+      if (currentQuestionIndex >= TOTAL_QUESTIONS) {
+        nextBtn.textContent = '🏆 결과 확인하기!';
+      } else {
+        nextBtn.textContent = '다음 문제로 Go! ➡️';
+      }
+
       nextBtn.style.display = 'block';
       nextBtn.focus();
     }
 
+    // 다음 버튼 클릭 시 (다음 문제 또는 결과 화면)
+    function handleNext() {
+      if (currentQuestionIndex < TOTAL_QUESTIONS) {
+        generateNextQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    // 결과 화면 보여주기
+    function showResult() {
+      gameView.style.display = 'none';
+      resultView.style.display = 'block';
+
+      finalCorrectCount.textContent = correctCount;
+
+      // 칭찬 멘트 분기
+      // (10개: 완벽해요, 7~9개: 잘했어요, 5~6개: 좋아요, 4개 이하: 다시 도전)
+      if (correctCount === 10) {
+        resultEmoji.textContent = '👑';
+        resultPraiseText.textContent = '완벽해요!';
+        resultPraiseText.style.color = '#E91E63';
+        resultPraiseSub.textContent = '우와! 10문제를 모두 맞혔어요! 당신은 구구단 천재! 🥳';
+        // 대형 축하 폭죽 효과
+        triggerBigConfetti();
+      } else if (correctCount >= 7) {
+        resultEmoji.textContent = '🌟';
+        resultPraiseText.textContent = '잘했어요!';
+        resultPraiseText.style.color = '#3F51B5';
+        resultPraiseSub.textContent = '정말 훌륭해요! 조금만 더 하면 백점 맞을 수 있어요! 👍';
+      } else if (correctCount >= 5) {
+        resultEmoji.textContent = '🐣';
+        resultPraiseText.textContent = '좋아요!';
+        resultPraiseText.style.color = '#00897B';
+        resultPraiseSub.textContent = '절반 넘게 맞혔어요! 쑥쑥 실력이 늘고 있어요! 화이팅! 💪';
+      } else {
+        resultEmoji.textContent = '🌱';
+        resultPraiseText.textContent = '다시 도전';
+        resultPraiseText.style.color = '#FB8C00';
+        resultPraiseSub.textContent = '괜찮아요! 한 번 더 연습하면 훨씬 더 잘할 수 있어요! 😊';
+      }
+    }
+
+    // 대형 폭죽 축하 함수
+    function triggerBigConfetti() {
+      if (typeof confetti !== 'function') return;
+      const duration = 2.5 * 1000;
+      const end = Date.now() + duration;
+
+      (function frame() {
+        confetti({
+          particleCount: 5,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 }
+        });
+        confetti({
+          particleCount: 5,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 }
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      }());
+    }
+
     // 이벤트 리스너 등록
     submitBtn.addEventListener('click', checkAnswer);
+    nextBtn.addEventListener('click', handleNext);
+    restartBtn.addEventListener('click', startGame);
 
     answerInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -332,10 +575,8 @@
       }
     });
 
-    nextBtn.addEventListener('click', generateQuestion);
-
-    // 초기 문제 출제
-    generateQuestion();
+    // 게임 시작
+    startGame();
   </script>
 </body>
 </html>
